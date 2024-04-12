@@ -1,0 +1,3 @@
+/home/max/CLionProjects/2Dappr/cmake-build-debug/CMakeFiles/2Dappr.dir
+/home/max/CLionProjects/2Dappr/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/max/CLionProjects/2Dappr/cmake-build-debug/CMakeFiles/rebuild_cache.dir
