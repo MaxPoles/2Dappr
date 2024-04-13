@@ -3,22 +3,58 @@
 #include <math.h>
 #include <time.h>
 
-double max_norm(double *y, const int n);
-
-void printvec(double *y, const int n);
-
-void obnul(double *y, int n);
+void PrintVec(double *y, int n);
 
 double f1(double x, double y);
 
 double f2(double x, double y);
 
+double f3(double x, double y);
+
+double f4(double x, double y);
+
+double f5(double x, double y);
+
+double f6(double x, double y);
+
 double ortF1(double x, double y, int m, int n);
 
-double MPow(int k);
+double ortF2(double x, double y, int m, int n);
 
 double Norm(double **c, double **vertices, double *F, double(*fOrt)(double, double, int, int), int m, int n,
             double verticesCount);
+
+double NormMax(double **c, double **vertices, double *F, double(*fOrt)(double, double, int, int), int m, int n,
+               double verticesCount);
+
+void RavUzl(double *x, double a, double b, int n);
+
+void RandomUzl(double *x, double a, double b, int n);
+
+void RandRemoveVertices(double **v, double *F, int percent, int *count);
+
+double PolCheb(double x, int n);
+
+void PrintVertices(double **v, int n);
+
+void Find2DMap(double **vertices, double *F, double (*f)(double, double), int verticesCount);
+
+void PrintMatrixWithb(double **a, double *b, int n);
+
+void PrintMatrix(double **a, int n);
+
+void
+FindCVar(double **c, double **vertices, double *F, double(*fOrt)(double, double, int, int), int m, int n,
+         int verticesCount);
+
+double QuasiF(double x, double y, double **c, double(*fOrt)(double, double, int, int), int m, int n);
+
+double GaussSolve(double **a, double *x, double *b, int n);
+
+void MakeMatrix(double **A, double **v, double(*fOrt)(double, double, int, int), int m, int n, int verticesCount);
+
+void
+MakeY(double *y, double **v, double *F, double (*fOrt)(double, double, int, int), int m, int n, int verticesCount);
 
 double f1(double x, double y) { return 1 + x + 2 * y + x * y; }
 
@@ -30,7 +66,7 @@ double f4(double x, double y) { return sin(x); }
 
 double f5(double x, double y) { return (exp(x) - 1) * (y + 1); }
 
-double f6(double x, double y){return y*x*sin(5*x+y)/exp(8*x*y);}
+double f6(double x, double y) { return y * x * sin(5 * x + y) / exp(8 * x * y); }
 
 void RavUzl(double *x, double a, double b, int n) {
     for (int i = 0; i < n; ++i) {
@@ -39,9 +75,9 @@ void RavUzl(double *x, double a, double b, int n) {
     }
 }
 
-void RandomUzl(double *x, double a, double b, int n){
-    for(int i = 0; i < n; ++i){
-        x[i] = rand()/(double)RAND_MAX * (b - a) + a;
+void RandomUzl(double *x, double a, double b, int n) {
+    for (int i = 0; i < n; ++i) {
+        x[i] = rand() / (double) RAND_MAX * (b - a) + a;
     }
 }
 
@@ -84,7 +120,7 @@ double PolCheb(double x, int n) {
     return 2 * x * PolCheb(x, n - 1) - PolCheb(x, n - 2);
 }
 
-void printvec(double *y, const int n) {
+void PrintVec(double *y, int n) {
     int k = 0;
     for (int i = 0; i < n / 10; ++i) {
         for (int j = 0; j < 10; ++j) {
@@ -98,12 +134,6 @@ void printvec(double *y, const int n) {
         ++k;
     }
     printf("\n\n");
-}
-
-int power10(const int n) {
-    int var = 1;
-    for (int i = 0; i < n; ++i) var *= 10;
-    return var;
 }
 
 void Find2DMap(double **vertices, double *F, double (*f)(double, double), int verticesCount) {
@@ -207,23 +237,6 @@ double NormMax(double **c, double **vertices, double *F, double(*fOrt)(double, d
     return max;
 }
 
-void NormalizeVector(double **v, int m, int n) {
-    double norm = 0;
-    for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < n; ++j) {
-            //norm += v[i][j] * v[i][j];
-            if (norm < fabs(v[i][j])) norm = fabs(v[i][j]);
-        }
-    }
-    //printf("норма: %lf\n", norm);
-    for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < n; ++j) {
-            v[i][j] = v[i][j] / norm;
-            //printf("v: %lf\n", v[i][j]);
-        }
-    }
-}
-
 void PrintMatrix(double **a, int n) {
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
@@ -245,20 +258,11 @@ void PrintMatrixWithb(double **a, double *b, int n) {
     printf("\n\n");
 }
 
-void SaveCToFile(FILE *file, double **c, int m, int n) {
-    for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < n; ++j) {
-            fprintf(file, "%.12lf ", c[i][j]);
-        }
-        fprintf(file, "\n");
-    }
-}
-
 double GaussSolve(double **a, double *x, double *b, int n) { //a[i][j] i строка, j столбец
     double max, tmp;
     int iRMax;
 
-    //printvec(b, n);
+    //PrintVec(b, n);
     for (int i = 0; i < n; ++i) { //по строкам
         max = 0;
         for (int j = i; j < n; ++j) { //по строкам находим строку с максимальным элементом
@@ -303,7 +307,7 @@ double GaussSolve(double **a, double *x, double *b, int n) { //a[i][j] i стр�
         //printf("Пошли нахуй\n");
         //PrintMatrixWithb(a, b, n);
     }
-    //printvec(b, n);
+    //PrintVec(b, n);
     for (int i = n - 1; i >= 0; --i) {
         for (int k = i - 1; k >= 0; --k) {
             b[k] -= b[i] * a[k][i];
@@ -315,7 +319,7 @@ double GaussSolve(double **a, double *x, double *b, int n) { //a[i][j] i стр�
     for (int i = 0; i < n; ++i) {
         x[i] = b[i];
     }
-    //printvec(b, n);
+    //PrintVec(b, n);
     //printf("Пошли нахуй\n");
     //PrintMatrixWithb(a, b, n);
 }

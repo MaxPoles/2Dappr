@@ -8,7 +8,7 @@
  */
 
 int main() {
-    FILE *file, *fileX, *fileY, *fileZ;
+    FILE *fileX, *fileY, *fileZ;
     double **vertices, **c, **grad, **A; //m, n
     double *xUzl, *yUzl, *F, *y, *cLine;
     double (*fOrt)(double, double, int, int);
@@ -24,8 +24,8 @@ int main() {
     //Объявление переменных
     m = 8;
     n = 8;
-    xSplitCount = 60;
-    ySplitCount = 60;
+    xSplitCount = 10;
+    ySplitCount = 10;
     x_0 = -1;
     x_1 = 1;
     y_0 = -1;
@@ -37,7 +37,6 @@ int main() {
     f = f1;
     UzlDivide = RandomUzl;
 
-    file = fopen("data.txt", "w");
     fileX = fopen("x.txt", "w");
     fileY = fopen("y.txt", "w");
     fileZ = fopen("z.txt", "w");
@@ -74,9 +73,9 @@ int main() {
     }
     //Разбиение плоскости на квадраты
     UzlDivide(xUzl, x_0, x_1, xSplitCount);
-    //printvec(xUzl, xSplitCount);
+    //PrintVec(xUzl, xSplitCount);
     UzlDivide(yUzl, y_0, y_1, ySplitCount);
-    //printvec(yUzl, ySplitCount);
+    //PrintVec(yUzl, ySplitCount);
     kVar = 0;
     for (int i = 0; i < xSplitCount; ++i) {
         for (int j = 0; j < ySplitCount; ++j) {
@@ -87,14 +86,14 @@ int main() {
         }
     } // Тут всё зашибись, не проверяй
 
-    //Создаём матрицу и вектора
+    //Строим F и выкидываем часть точек
     Find2DMap(vertices, F, f, verticesCount);
     RandRemoveVertices(vertices, F, percent, &verticesCount);
 
+    //Создаём матрицу и вектора
     MakeY(y, vertices, F, fOrt, m, n, verticesCount);
     MakeMatrix(A, vertices, fOrt, m, n, verticesCount);
 
-    //Махинации с рандомом
     //PrintVertices(vertices, verticesCount);
     //PrintVertices(vertices, verticesCount);
     //printf("verticesCount: %d\n", verticesCount);
@@ -115,12 +114,7 @@ int main() {
         printf("\n");
     }
     deviation = Norm(c, vertices, F, fOrt, m, n, verticesCount);
-
-    for (int i = 0; i < verticesCount; ++i) {
-        //printf("F %lf\n", F[i]);
-    }
-
-    printf("Погрешность:\n%lf\n%.1e\n", deviation, deviation);
+    printf("Норма:\n%lf\n%.1e\n", deviation, deviation);
     deviation = NormMax(c, vertices, F, fOrt, m, n, verticesCount);
     printf("Максимальное отклонение:\n%lf\n%.1e\n", deviation, deviation);
     //SaveCToFile(file, c, m, n);
@@ -156,7 +150,6 @@ int main() {
     free(yUzl);
     free(F);
     free(grad);
-    fclose(file);
     fclose(fileX);
     fclose(fileY);
     fclose(fileZ);
