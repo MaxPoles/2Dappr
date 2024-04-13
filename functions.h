@@ -17,9 +17,15 @@ double f5(double x, double y);
 
 double f6(double x, double y);
 
+double f7(double x, double y);
+
+double f8(double x, double y);
+
 double ortF1(double x, double y, int m, int n);
 
 double ortF2(double x, double y, int m, int n);
+
+double ortF3(double x, double y, int m, int n);
 
 double Norm(double **c, double **vertices, double *F, double(*fOrt)(double, double, int, int), int m, int n,
             double verticesCount);
@@ -34,6 +40,8 @@ void RandomUzl(double *x, double a, double b, int n);
 void RandRemoveVertices(double **v, double *F, int percent, int *count);
 
 double PolCheb(double x, int n);
+
+double PolLej(double x, int n);
 
 void PrintVertices(double **v, int n);
 
@@ -67,6 +75,8 @@ double f4(double x, double y) { return sin(x); }
 double f5(double x, double y) { return (exp(x) - 1) * (y + 1); }
 
 double f6(double x, double y) { return y * x * sin(5 * x + y) / exp(8 * x * y); }
+
+double f7(double x, double y) { (void) x; (void) y; return 2.; }
 
 void RavUzl(double *x, double a, double b, int n) {
     for (int i = 0; i < n; ++i) {
@@ -120,6 +130,12 @@ double PolCheb(double x, int n) {
     return 2 * x * PolCheb(x, n - 1) - PolCheb(x, n - 2);
 }
 
+double PolLej(double x, int n) {
+    if (n == 0) return 1;
+    if (n == 1) return x;
+    return (2. * n + 1.) / (n + 1.) * x * PolLej(x, n - 1) - n / (n + 1.) * PolLej(x, n - 2);
+}
+
 void PrintVec(double *y, int n) {
     int k = 0;
     for (int i = 0; i < n / 10; ++i) {
@@ -150,6 +166,10 @@ double ortF1(double x, double y, int m, int n) {
 
 double ortF2(double x, double y, int m, int n) {
     return PolCheb(x, m) * PolCheb(y, n);
+}
+
+double ortF3(double x, double y, int m, int n) {
+    return PolLej(x, m) * PolLej(y, n);
 }
 
 void

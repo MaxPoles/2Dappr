@@ -17,24 +17,24 @@ int main() {
     double x_0, x_1, y_0, y_1;
     int percent;
     int xSplitCount, ySplitCount, verticesCount;
-    int m, n, T, kVar;
+    int m, n, kVar;
     int outSplitCount;
     double deviation;
     //m 12,n 12,x 14,y 14, f6, 15
     //Объявление переменных
-    m = 8;
-    n = 8;
-    xSplitCount = 10;
-    ySplitCount = 10;
+    m = 10;
+    n = 10;
+    xSplitCount = 15;
+    ySplitCount = 15;
     x_0 = -1;
     x_1 = 1;
     y_0 = -1;
     y_1 = 1;
     outSplitCount = 100;
-    percent = 9;
+    percent = 0;
 
     fOrt = ortF2;
-    f = f1;
+    f = f7;
     UzlDivide = RandomUzl;
 
     fileX = fopen("x.txt", "w");
