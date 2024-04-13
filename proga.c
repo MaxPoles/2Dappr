@@ -8,38 +8,48 @@
  */
 
 int main() {
-    FILE *file;
+    FILE *file, *fileX, *fileY, *fileZ;
     double **vertices, **c, **grad, **A; //m, n
     double *xUzl, *yUzl, *F, *y, *cLine;
     double (*fOrt)(double, double, int, int);
+    double (*f)(double, double);
+    void (*UzlDivide)(double *, double, double, int);
     double x_0, x_1, y_0, y_1;
+    int percent;
     int xSplitCount, ySplitCount, verticesCount;
     int m, n, T, kVar;
     int outSplitCount;
     double deviation;
-    double delta = 1e-8, h = 1e-4, stepDelta = 1e-3;
-    int maxIter = 1000000;
-
+    //m 12,n 12,x 14,y 14, f6, 15
     //Объявление переменных
-    m = 11;
-    n = 12;
-    xSplitCount = 12;
-    ySplitCount = 10;
-    x_0 = 1;
-    x_1 = 5.2;
-    y_0 = 1;
-    y_1 = 5;
-    T = m * n;
+    m = 8;
+    n = 8;
+    xSplitCount = 60;
+    ySplitCount = 60;
+    x_0 = -1;
+    x_1 = 1;
+    y_0 = -1;
+    y_1 = 1;
     outSplitCount = 100;
-    fOrt = ortF1;
+    percent = 9;
+
+    fOrt = ortF2;
+    f = f1;
+    UzlDivide = RandomUzl;
+
     file = fopen("data.txt", "w");
+    fileX = fopen("x.txt", "w");
+    fileY = fopen("y.txt", "w");
+    fileZ = fopen("z.txt", "w");
     verticesCount = xSplitCount * ySplitCount;
-    printf("verticesCount: %d\n", verticesCount);
+    printf("Кол-во точек: %d\n", verticesCount);
     //Нормировка
     ++m;
     ++n;
 
     //Выделение памяти
+    srand(time(NULL));
+
     xUzl = (double *) malloc((xSplitCount) * sizeof(double));
     yUzl = (double *) malloc((ySplitCount) * sizeof(double));
     cLine = (double *) malloc(m * n * sizeof(double));
@@ -63,9 +73,9 @@ int main() {
         A[i] = (double *) malloc(m * n * sizeof(double));
     }
     //Разбиение плоскости на квадраты
-    RavUzl(xUzl, x_0, x_1, xSplitCount);
+    UzlDivide(xUzl, x_0, x_1, xSplitCount);
     //printvec(xUzl, xSplitCount);
-    RavUzl(yUzl, y_0, y_1, ySplitCount);
+    UzlDivide(yUzl, y_0, y_1, ySplitCount);
     //printvec(yUzl, ySplitCount);
     kVar = 0;
     for (int i = 0; i < xSplitCount; ++i) {
@@ -76,188 +86,28 @@ int main() {
             //printf("i: %d, x: %lf, y: %lf\n", kVar - 1, vertices[kVar - 1][0], vertices[kVar - 1][1]);
         }
     } // Тут всё зашибись, не проверяй
-    Find2DMap(vertices, F, f1, verticesCount);
+
+    //Создаём матрицу и вектора
+    Find2DMap(vertices, F, f, verticesCount);
+    RandRemoveVertices(vertices, F, percent, &verticesCount);
+
     MakeY(y, vertices, F, fOrt, m, n, verticesCount);
-
     MakeMatrix(A, vertices, fOrt, m, n, verticesCount);
-    //printf("Выберете метод:\n1 - Градиентный спуск\n2 - Решение СЛУ\n3 - Градиентный спуск V2\n");
-    //scanf("%d", &kVar);
 
-    GaussSolve1(A, cLine, y, m * n);
+    //Махинации с рандомом
+    //PrintVertices(vertices, verticesCount);
+    //PrintVertices(vertices, verticesCount);
+    //printf("verticesCount: %d\n", verticesCount);
+    printf("Кол-во точек после выброса: %d\n", verticesCount);
+
+
+    //Решаем СЛУ
+    GaussSolve(A, cLine, y, m * n);
     for (int i = 0; i < m * n; ++i) {
-        //printf("Cline: ");
-        //printvec(cLine, m * n);
         c[i / n][i % n] = cLine[i];
     }
-    /*
-    } else if(kVar == 1) {
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
-                c[i][j] = 0;
-            }
-        }
-        double norm1 = 0;
-        double norm2 = 0;
-        double lastNorm = 0;
-        for (int t = 0; t < maxIter; ++t) {
-            for (int i = 0; i < m; ++i) {
-                for (int j = 0; j < n; ++j) {
-                    c[i][j] -= delta;
-                    norm1 = Norm(c, vertices, F, ortF2, m, n, verticesCount);
-                    c[i][j] += 2 * delta;
-                    norm2 = Norm(c, vertices, F, ortF2, m, n, verticesCount);
-                    grad[i][j] = (norm2 - norm1) / delta / 2.;
-                    c[i][j] -= delta;
-                    if (t % 40000 == 0)
-                        printf("%lf\n", grad[i][j]);
-                }
-            }
-            //norm1 = Norm(c, vertices, F, ortF2, m, n, verticesCount); // счиитаем норму на данном моменте
-            if (t % 40000 == 0) {
-                for (int i = 0; i < n; ++i) {
-                    for (int j = 0; j < m; ++j) {
-                        printf("%lf  ", c[i][j]);
-                    }
-                    printf("\n");
-                }
-                printf("h: %.1e\n", h);
-                printf("|| ||: %lf   %.1e\n", norm1, norm1);
-                printf("\n");
-            }
-            double max = 0;
-            for (int i = 0; i < m; ++i) {
-                for (int j = 0; j < n; ++j) {
-                    if (max < fabs(grad[i][j])) max = fabs(grad[i][j]);
-                }
-            }
-            if (max < 1e-12) break;
-            for (int i = 0; i < m; ++i) {
-                for (int j = 0; j < n; ++j) {
-                    grad[i][j] = grad[i][j] / max;
-                }
-            }
 
-            //NormalizeVector(grad, m, n);
-            //for (int i = 0; i < m; ++i) {
-            //    for (int j = 0; j < n; ++j) {
-            //        c[i][j] -= grad[i][j] * h;
-            //    }
-            //}
-
-            for (int i = 0; i < m; ++i) {
-                for (int j = 0; j < n; ++j) {
-                    c[i][j] -= grad[i][j] * h;
-                }
-            }
-
-            if (max > lastNorm) {
-                h /= 2.;
-            } else {
-                h *= 2.;
-            }
-
-
-            if (fabs(lastNorm - max) < stepDelta) {
-                h *= 2.;
-            } else if (max > lastNorm && h > 1e-12) {
-                h /= 2.;
-            }
-
-            lastNorm = max;
-            //printf("\n");
-        }
-    }
-    */
-    //Нахождение градиента
-    /*
-    for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < n; ++j) {
-            c[i][j] = 0;
-        }
-    }
-    double norm1 = 0;
-    double norm2 = 0;
-    double lastNorm = 0;
-    for (int t = 0; t < maxIter; ++t) {
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
-                c[i][j] -= delta;
-                norm1 = Norm(c, vertices, F, ortF2, m, n, verticesCount);
-                c[i][j] += 2 * delta;
-                norm2 = Norm(c, vertices, F, ortF2, m, n, verticesCount);
-                grad[i][j] = (norm2 - norm1) / delta / 2.;
-                c[i][j] -= delta;
-                if (t % 40000 == 0)
-                    printf("%lf\n", grad[i][j]);
-            }
-        }
-        //norm1 = Norm(c, vertices, F, ortF2, m, n, verticesCount); // счиитаем норму на данном моменте
-        if (t % 40000 == 0) {
-            for (int i = 0; i < n; ++i) {
-                for (int j = 0; j < m; ++j) {
-                    printf("%lf  ", c[i][j]);
-                }
-                printf("\n");
-            }
-            printf("h: %.1e\n", h);
-            printf("|| ||: %lf\n", norm1);
-            printf("\n");
-        }
-        double max = 0;
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
-                if (max < fabs(grad[i][j])) max = fabs(grad[i][j]);
-            }
-        }
-        if (max < 1e-12) break;
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
-                grad[i][j] = grad[i][j] / max;
-            }
-        }
-
-        //NormalizeVector(grad, m, n);
-        //for (int i = 0; i < m; ++i) {
-        //    for (int j = 0; j < n; ++j) {
-        //        c[i][j] -= grad[i][j] * h;
-        //    }
-        //}
-
-    for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < n; ++j) {
-            c[i][j] -= grad[i][j] * h;
-        }
-    }
-
-    //if (max > lastNorm) h /= 2.;
-    if (fabs(lastNorm - max) < stepDelta) {
-        h *= 2.;
-    } else if (max > lastNorm && h > 1e-12) {
-        h /= 2.;
-    }
-    lastNorm = max;
-    //printf("\n");
-}    grad = (double **) malloc(m * sizeof(double *));
-    vertices = (double **) malloc(verticesCount * sizeof(double *));
-
-*/
-
-//Нахождение Cmn
-//
-//FindCVar(c, vertices, F, ortF2, m ,n, verticesCount);
-
-//Вывод данных в файл
-/*
-for(int i = 0; i < m; ++i){
-    for(int j = 0; i < n; ++j){
-        double xDot = (x_1 - x_0) / (outSplitCount - 1.) * i + x_0;
-        double yDot = (y_1 - y_0) / (outSplitCount - 1.) * j + y_0;
-        fprintf()
-    }
-}
-*/
-
-
+    //Выводим матрицу коэффециентов c
     for (int i = 0; i < m; ++i) {
         for (int j = 0; j < n; ++j) {
             printf("%lf  ", c[i][j]);
@@ -265,21 +115,38 @@ for(int i = 0; i < m; ++i){
         printf("\n");
     }
     deviation = Norm(c, vertices, F, fOrt, m, n, verticesCount);
-/*
-for (int i = 0; i < n; ++i) {
-    for (int j = 0; j < m; ++j) {
-        printf("%lf  ", c[i][j]);
-    }
-    printf("\n");
-}
 
     for (int i = 0; i < verticesCount; ++i) {
-        printf("F %lf\n", F[i]);
+        //printf("F %lf\n", F[i]);
     }
-    */
-    printf("Погрешность:\n%lf\n%.1e\n", deviation, deviation);
 
-//Очистка памяти
+    printf("Погрешность:\n%lf\n%.1e\n", deviation, deviation);
+    deviation = NormMax(c, vertices, F, fOrt, m, n, verticesCount);
+    printf("Максимальное отклонение:\n%lf\n%.1e\n", deviation, deviation);
+    //SaveCToFile(file, c, m, n);
+
+    free(xUzl);
+    free(yUzl);
+    xUzl = (double *) malloc((outSplitCount) * sizeof(double));
+    yUzl = (double *) malloc((outSplitCount) * sizeof(double));
+
+    RavUzl(xUzl, x_0, x_1, outSplitCount);
+    RavUzl(yUzl, y_0, y_1, outSplitCount);
+
+    for (int i = 0; i < outSplitCount; ++i) {
+        for (int j = 0; j < outSplitCount; ++j) {
+            fprintf(fileX, "%.12lf ", xUzl[j]);
+            fprintf(fileY, "%.12lf ", yUzl[i]);
+
+            fprintf(fileZ, "%.12lf ", QuasiF(xUzl[j], yUzl[i], c, fOrt, m, n));
+        }
+        fprintf(fileX, "\n");
+        fprintf(fileY, "\n");
+        fprintf(fileZ, "\n");
+    }
+
+
+    //Очистка памяти
     free(vertices);
     free(c);
     free(y);
@@ -290,5 +157,8 @@ for (int i = 0; i < n; ++i) {
     free(F);
     free(grad);
     fclose(file);
+    fclose(fileX);
+    fclose(fileY);
+    fclose(fileZ);
     return 0;
 }
