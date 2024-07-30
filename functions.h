@@ -324,7 +324,6 @@ double GaussSolve(double **a, double *x, double *b, int n) { //a[i][j] i стр�
                 a[k][j] -= a[i][j] * tmp;
             }
         }
-        //printf("Пошли нахуй\n");
         //PrintMatrixWithb(a, b, n);
     }
     //PrintVec(b, n);
@@ -333,14 +332,12 @@ double GaussSolve(double **a, double *x, double *b, int n) { //a[i][j] i стр�
             b[k] -= b[i] * a[k][i];
             a[k][i] -= a[i][i] * a[k][i];
         }
-        //printf("Сильно идём нахуй\n");
         //PrintMatrixWithb(a, b, n);
     }
     for (int i = 0; i < n; ++i) {
         x[i] = b[i];
     }
     //PrintVec(b, n);
-    //printf("Пошли нахуй\n");
     //PrintMatrixWithb(a, b, n);
 }
 
