@@ -84,7 +84,7 @@ int main() {
             ++kVar;
             //printf("i: %d, x: %lf, y: %lf\n", kVar - 1, vertices[kVar - 1][0], vertices[kVar - 1][1]);
         }
-    } // Тут всё зашибись, не проверяй
+    }
 
     //Строим F и выкидываем часть точек
     Find2DMap(vertices, F, f, verticesCount);
